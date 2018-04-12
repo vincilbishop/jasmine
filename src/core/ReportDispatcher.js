@@ -40,6 +40,7 @@ getJasmineRequireObj().ReportDispatcher = function(j$) {
         var reporter = reporters[i];
         addFn(fns, reporter, method, args);
       }
+      console.log('reporting ' + method + ': ' + new Date());
 
       queueRunnerFactory({
         queueableFns: fns,

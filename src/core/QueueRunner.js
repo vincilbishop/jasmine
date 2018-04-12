@@ -63,6 +63,8 @@ getJasmineRequireObj().QueueRunner = function(j$) {
     var self = this, completedSynchronously = true,
       handleError = function handleError(error) {
         onException(error);
+        console.log(error.message);
+        console.log(error.stack);
         next(error);
       },
       cleanup = once(function cleanup() {

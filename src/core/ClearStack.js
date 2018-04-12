@@ -65,5 +65,19 @@ getJasmineRequireObj().clearStack = function(j$) {
     }
   }
 
-  return getClearStack;
+  function wrappedClearStack(global) {
+    var cs = getClearStack(global);
+    return function(cb) {
+      try {
+        throw new Error();
+      } catch(e) {
+        console.error('clear: ' + new Date());
+        console.log(e.stack);
+      }
+      cs(cb);
+    }
+  }
+
+  // return getClearStack;
+  return wrappedClearStack;
 };

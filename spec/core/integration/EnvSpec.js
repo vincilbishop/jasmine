@@ -1012,6 +1012,7 @@ describe("Env integration", function() {
     });
 
     afterEach(function() {
+      console.log('my integration spec completed ' + new Date());
       jasmine.clock().tick(1);
       jasmine.clock().tick(1);
       jasmine.clock().uninstall();
@@ -1019,6 +1020,7 @@ describe("Env integration", function() {
     });
 
     it("should wait a default interval before failing specs that haven't called done yet", function(done) {
+      // console.log('default interval');
       var env = new jasmineUnderTest.Env(),
           reporter = jasmine.createSpyObj('fakeReporter', [ "specDone", "jasmineDone" ]);
 
@@ -1048,6 +1050,7 @@ describe("Env integration", function() {
     });
 
     it("should not use the mock clock for asynchronous timeouts", function(done){
+      console.log('async timeouts');
       var env = new jasmineUnderTest.Env(),
         reporter = jasmine.createSpyObj('fakeReporter', [ "specDone", "jasmineDone" ]),
         clock = env.clock;
@@ -1086,23 +1089,48 @@ describe("Env integration", function() {
     });
 
     it('should wait a custom interval before reporting async functions that fail to call done', function(done) {
-      var env = new jasmineUnderTest.Env(),
-          reporter = jasmine.createSpyObj('fakeReport', ['jasmineDone', 'suiteDone', 'specDone']),
+      // if (jasmineUnderTest.getGlobal().setImmediate) {
+        // spyOn(jasmineUnderTest.getGlobal(), 'setImmediate').and.callFake(function(cb) {
+          // console.log('immediate');
+          // setTimeout(cb, 0);
+        // });
+      // }
+      var env = new jasmineUnderTest.Env({
+          setTimeout: setTimeout,
+          clearTimeout: clearTimeout,
+          setInterval: setInterval,
+          clearInterval: clearInterval,
+          setImmediate: function(cb) { realSetTimeout(cb, 0); }
+        }),
+          reporter =  jasmine.createSpyObj('fakeReport', ['jasmineDone', 'suiteDone', 'specDone']),
+          // {
+            // jasmineDone: jasmine.createSpy('jasmineDone'),
+            // suiteDone: function(a, b) {},
+            // specDone: function(a, b) {}
+          // },
           timeoutFailure = (/^Error: Timeout - Async callback was not invoked within timeout specified by jasmine\.DEFAULT_TIMEOUT_INTERVAL\./);
 
       reporter.specDone.and.callFake(function(r) {
-        realSetTimeout(function() {
-          jasmine.clock().tick(1);
-        }, 0);
+      // spyOn(reporter, 'specDone').and.callFake(function(r, innerDone) {
+        // realSetTimeout(function() {
+          console.log('specDone: ' + r.fullName + ' - ' + new Date());
+          console.log(r);
+          // jasmine.clock().tick(1);
+          // innerDone();
+        // }, 0);
       });
 
       reporter.suiteDone.and.callFake(function(r) {
-        realSetTimeout(function() {
-          jasmine.clock().tick(1);
-        }, 0);
+      // spyOn(reporter, 'suiteDone').and.callFake(function(r, innerDone) {
+        // realSetTimeout(function() {
+          console.log('suiteDone: ' + r.fullName);
+          // jasmine.clock().tick(1);
+          // innerDone();
+        // }, 0);
       });
 
-      reporter.jasmineDone.and.callFake(function() {
+      reporter.jasmineDone.and.callFake(function(r) {
+        expect(r.failedExpectations).toEqual([]);
         expect(reporter.suiteDone).toHaveFailedExpectationsForRunnable('suite beforeAll', [ timeoutFailure ]);
         expect(reporter.suiteDone).toHaveFailedExpectationsForRunnable('suite afterAll', [ timeoutFailure ]);
         expect(reporter.specDone).toHaveFailedExpectationsForRunnable('suite beforeEach times out', [ timeoutFailure ]);
@@ -1114,10 +1142,12 @@ describe("Env integration", function() {
       });
 
       env.addReporter(reporter);
+      env.randomizeTests(false);
       jasmineUnderTest.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
       env.describe('suite', function() {
         env.afterAll(function() {
+          console.log('global afterAll');
           realSetTimeout(function() {
             try {
               jasmine.clock().tick(10);
@@ -1128,12 +1158,14 @@ describe("Env integration", function() {
         });
         env.describe('beforeAll', function() {
           env.beforeAll(function(innerDone) {
+            console.log('beforeAll');
             realSetTimeout(function() {
               jasmine.clock().tick(5001);
             }, 0);
           }, 5000);
 
           env.it('times out', function(innerDone) {
+            console.log('it beforeAll timeout');
             realSetTimeout(function() {
               jasmine.clock().tick(1);
               innerDone();
@@ -1143,12 +1175,14 @@ describe("Env integration", function() {
 
         env.describe('afterAll', function() {
           env.afterAll(function(innerDone) {
+            console.log('afterAll');
             realSetTimeout(function() {
               jasmine.clock().tick(2001);
             }, 0);
           }, 2000);
 
           env.it('times out', function(innerDone) {
+            console.log('it afterAll timeout');
             realSetTimeout(function() {
               jasmine.clock().tick(1);
               innerDone();
@@ -1158,12 +1192,14 @@ describe("Env integration", function() {
 
         env.describe('beforeEach', function() {
           env.beforeEach(function(innerDone) {
+            console.log('beforeEach');
             realSetTimeout(function() {
               jasmine.clock().tick(1001);
             }, 0);
           }, 1000);
 
           env.it('times out', function(innerDone) {
+            console.log('it beforeEach timeout');
             realSetTimeout(function() {
               jasmine.clock().tick(1);
               innerDone();
@@ -1173,12 +1209,14 @@ describe("Env integration", function() {
 
         env.describe('afterEach', function() {
           env.afterEach(function(innerDone) {
+            console.log('afterEach');
             realSetTimeout(function() {
               jasmine.clock().tick(4001);
             }, 0);
           }, 4000);
 
           env.it('times out', function(innerDone) {
+            console.log('it afterEach timeout');
             realSetTimeout(function() {
               jasmine.clock().tick(1);
               innerDone();
@@ -1187,6 +1225,7 @@ describe("Env integration", function() {
         });
 
         env.it('it times out', function(innerDone) {
+          console.log('itsa me');
           realSetTimeout(function() {
             jasmine.clock().tick(6001);
           }, 0);
