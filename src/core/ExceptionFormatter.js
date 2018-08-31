@@ -5,6 +5,7 @@ getJasmineRequireObj().ExceptionFormatter = function(j$) {
     this.message = function(error) {
       var message = '';
 
+      /*
       if (error.name && error.message) {
         message += error.name + ': ' + error.message;
       } else {
@@ -18,6 +19,9 @@ getJasmineRequireObj().ExceptionFormatter = function(j$) {
       if (error.line || error.lineNumber) {
         message += ' (line ' + (error.line || error.lineNumber) + ')';
       }
+      */
+
+      message += '******************************\nERROR\n' + JSON.stringify(error) + '\n******************************';
 
       return message;
     };
