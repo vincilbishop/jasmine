@@ -23,8 +23,8 @@ getJasmineRequireObj().ExceptionFormatter = function(j$) {
 
       message += '******************************\nERROR\n' + JSON.stringify(error) + '\n******************************';
 
-      console.error(message);
-      
+      console.karma_error(message);
+
       return message;
     };
 
