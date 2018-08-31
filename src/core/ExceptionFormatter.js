@@ -5,11 +5,11 @@ getJasmineRequireObj().ExceptionFormatter = function(j$) {
     this.message = function(error) {
       var message = '';
 
-      /*
       if (error.name && error.message) {
         message += error.name + ': ' + error.message;
       } else {
-        message += error.toString() + ' thrown';
+        // message += error.toString() + ' thrown';
+        message += JSON.stringify(error) + ' thrown';
       }
 
       if (error.fileName || error.sourceURL) {
@@ -19,11 +19,6 @@ getJasmineRequireObj().ExceptionFormatter = function(j$) {
       if (error.line || error.lineNumber) {
         message += ' (line ' + (error.line || error.lineNumber) + ')';
       }
-      */
-
-      message += '******************************\nERROR\n' + JSON.stringify(error) + '\n******************************';
-
-      console.karma_error(message);
 
       return message;
     };
